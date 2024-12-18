@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from core.models import Tank, Log
+from core.models import Tank, Log, DigitalInput, Relay
 
 
 def tank_dashboard(request):
@@ -38,4 +38,18 @@ def set_target_temperature(request, tank_name):
         'tank': tank,
     }
     return render(request, 'dashboard/set_temperature.html', context)
+
+
+def system_status(request):
+    """
+    Displays the current status of the system (inputs and relays).
+    """
+    inputs = DigitalInput.objects.all()
+    relays = Relay.objects.all()
+    context = {
+        'inputs': inputs,
+        'relays': relays,
+    }
+    return render(request, 'dashboard/system_status.html', context)
+
 

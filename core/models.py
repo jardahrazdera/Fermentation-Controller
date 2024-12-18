@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Tank(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True, null=True)
@@ -33,8 +34,6 @@ class Valve(models.Model):
         return f"{self.name} - {'Open' if self.is_open else 'Closed'}"
 
 
-from django.db import models
-
 class Log(models.Model):
     tank = models.ForeignKey('Tank', on_delete=models.CASCADE, related_name='logs')
     event = models.CharField(max_length=255)
@@ -44,3 +43,23 @@ class Log(models.Model):
 
     def __str__(self):
         return f"Log for {self.tank.name} at {self.timestamp}"
+
+
+class DigitalInput(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    circuit = models.CharField(max_length=50, help_text="EVOK API circuit ID")
+    state = models.BooleanField(default=False, help_text="Current state of the input")
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {'Active' if self.state else 'Inactive'}"
+
+
+class Relay(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    circuit = models.CharField(max_length=50, help_text="EVOK API circuit ID")
+    is_active = models.BooleanField(default=False, help_text="Current state of the relay")
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {'Active' if self.is_active else 'Inactive'}"

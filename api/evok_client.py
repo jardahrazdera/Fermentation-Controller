@@ -34,15 +34,49 @@ class EvokClient:
             print(f"Error setting relay {circuit} to {value}: {e}")
             return False
 
+    def get_digital_input_state(self, circuit):
+        """
+        Reads the state of a digital input from EVOK API.
+        :param circuit: The circuit ID of the digital input (e.g., '1_01').
+        :return: True if active, False if inactive, or None on error.
+        """
+        url = f"{self.base_url}/di/{circuit}"
+        try:
+            response = requests.get(url, headers={"Accept": "application/json"})
+            response.raise_for_status()
+            data = response.json()
+            return data.get("value", False)
+        except requests.RequestException as e:
+            print(f"Error reading digital input state for circuit {circuit}: {e}")
+            return None
+
+    def get_relay_state(self, circuit):
+        """
+        Reads the state of a relay from EVOK API.
+        :param circuit: The circuit ID of the relay (e.g., '1_01').
+        :return: True if active, False if inactive, or None on error.
+        """
+        url = f"{self.base_url}/ro/{circuit}"
+        try:
+            response = requests.get(url, headers={"Accept": "application/json"})
+            response.raise_for_status()
+            data = response.json()
+            return data.get("value", False)
+        except requests.RequestException as e:
+            print(f"Error reading relay state for circuit {circuit}: {e}")
+            return None
+
 
 # Test
 if __name__ == "__main__":
     client = EvokClient()
 
+    # Test temperature reading
     sensor_circuit = "2870F55704E13DC0"
     temp = client.get_temperature(sensor_circuit)
     print(f"Temperature for circuit {sensor_circuit}: {temp} °C")
 
+    # Test relay setting
     relay_circuit = "2_01"
     result = client.set_relay(relay_circuit, 1)
     print(f"Relay {relay_circuit} set to ON: {'Success' if result else 'Failed'}")

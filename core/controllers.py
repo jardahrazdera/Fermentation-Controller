@@ -1,5 +1,5 @@
 from api.evok_client import EvokClient
-from core.models import Sensor, Valve, Tank, Log
+from core.models import Sensor, Valve, Tank, Log, DigitalInput, Relay
 from django.utils import timezone
 
 
@@ -91,3 +91,51 @@ def control_valve(valve_name, state):
             print(f"Failed to control valve '{valve.name}'.")
     except Valve.DoesNotExist:
         print(f"Error: Valve '{valve_name}' does not exist. Please add it to the database.")
+
+
+def update_inputs_and_relays():
+    """
+    Updates the state of digital inputs and relays based on the current system status.
+    """
+    client = EvokClient()
+
+    # Update digital inputs
+    inputs = DigitalInput.objects.all()
+    for di in inputs:
+        state = client.get_digital_input_state(di.circuit)  # Read state from EVOK API
+        if state is not None:
+            di.state = state
+            di.save()
+            print(f"Digital Input '{di.name}' updated to {'Active' if state else 'Inactive'}.")
+
+    # Process Total Stop first (highest priority)
+    total_stop = DigitalInput.objects.get(name="Total_Stop_DI")
+    if total_stop.state:
+        print("Total Stop is active. Disabling all relays.")
+        relays = Relay.objects.all()
+        for relay in relays:
+            client.set_relay(relay.circuit, 0)  # Turn off relay
+            relay.is_active = False
+            relay.save()
+        return  # Skip other processing when total stop is active
+
+    # Update relays based on inputs
+    pump_di = DigitalInput.objects.get(name="Pump_DI")
+    pump_relay = Relay.objects.get(name="Pump_Relay")
+    if pump_di.state:
+        client.set_relay(pump_relay.circuit, 1)  # Turn on relay
+        pump_relay.is_active = True
+    else:
+        client.set_relay(pump_relay.circuit, 0)  # Turn off relay
+        pump_relay.is_active = False
+    pump_relay.save()
+
+    chiller_di = DigitalInput.objects.get(name="Chiller_DI")
+    chiller_relay = Relay.objects.get(name="Chiller_Relay")
+    if chiller_di.state:
+        client.set_relay(chiller_relay.circuit, 1)  # Turn on relay
+        chiller_relay.is_active = True
+    else:
+        client.set_relay(chiller_relay.circuit, 0)  # Turn off relay
+        chiller_relay.is_active = False
+    chiller_relay.save()
