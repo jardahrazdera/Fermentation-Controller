@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs</title>
+</head>
+<body>
+    <h1>Recent Logs</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Tank</th>
+                <th>Event</th>
+                <th>Temperature</th>
+                <th>Valve State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.timestamp }}</td>
+                <td>{{ log.tank.name }}</td>
+                <td>{{ log.event }}</td>
+                <td>{{ log.temperature|default:"N/A" }}</td>
+                <td>
+                    {% if log.valve_state == True %}
+                        Open
+                    {% elif log.valve_state == False %}
+                        Closed
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
