@@ -33,8 +33,10 @@ class Valve(models.Model):
         return f"{self.name} - {'Open' if self.is_open else 'Closed'}"
 
 
+from django.db import models
+
 class Log(models.Model):
-    tank = models.ForeignKey(Tank, on_delete=models.CASCADE, related_name='logs')
+    tank = models.ForeignKey('Tank', on_delete=models.CASCADE, related_name='logs')
     event = models.CharField(max_length=255)
     temperature = models.FloatField(blank=True, null=True)
     valve_state = models.BooleanField(blank=True, null=True)
