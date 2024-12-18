@@ -13,3 +13,6 @@ db.sqlite3
 
 # Specific OS (MacOS) files
 *.DS_Store
+
+# PyCharm
+.idea/
