@@ -55,6 +55,7 @@ The **Fermentation Controller** is an advanced software-hardware solution that r
   - EMO-R8 module for relays.
   - DS18B20 sensors for temperature monitoring.
   - xG18 module for Modbus RTU (planned integration).
+  - Hardware manufacturer - Unipi technology (https://www.unipi.technology)
 
 - **Software**
   - **Operating System:** Debian 12 (Bookworm)
