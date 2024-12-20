@@ -42,13 +42,18 @@ def set_target_temperature(request, tank_name):
 
 def system_status(request):
     """
-    Displays the current status of the system (inputs and relays).
+    Displays the current status of the system (digital inputs and relays).
     """
     inputs = DigitalInput.objects.all()
     relays = Relay.objects.all()
+
+    # Get the state of Total Stop
+    total_stop = DigitalInput.objects.get(name="Total_Stop_DI").state
+
     context = {
         'inputs': inputs,
         'relays': relays,
+        'total_stop': total_stop,
     }
     return render(request, 'dashboard/system_status.html', context)
 

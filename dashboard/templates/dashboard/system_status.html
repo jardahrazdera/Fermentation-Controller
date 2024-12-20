@@ -3,47 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <title>System Status</title>
+    <style>
+        .active {
+            color: green;
+            font-weight: bold;
+        }
+        .inactive {
+            color: red;
+            font-weight: bold;
+        }
+        .total-stop {
+            background-color: yellow;
+            color: black;
+            padding: 5px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <h1>System Status</h1>
+
     <h2>Digital Inputs</h2>
     <table border="1">
-        <tr>
-            <th>Name</th>
-            <th>State</th>
-        </tr>
-        {% for input in inputs %}
-        <tr>
-            <td>{{ input.name }}</td>
-            <td>
-                {% if input.state %}
-                    Active
-                {% else %}
-                    Inactive
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for input in inputs %}
+            <tr>
+                <td>{{ input.name }}</td>
+                <td class="{% if input.state %}active{% else %}inactive{% endif %}">
+                    {% if input.state %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
 
     <h2>Relays</h2>
     <table border="1">
-        <tr>
-            <th>Name</th>
-            <th>State</th>
-        </tr>
-        {% for relay in relays %}
-        <tr>
-            <td>{{ relay.name }}</td>
-            <td>
-                {% if relay.is_active %}
-                    Active
-                {% else %}
-                    Inactive
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>State</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for relay in relays %}
+            <tr>
+                <td>{{ relay.name }}</td>
+                <td class="{% if relay.is_active %}active{% else %}inactive{% endif %}">
+                    {% if relay.is_active %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
     </table>
+
+    <h2>Total Stop</h2>
+    <div class="{% if total_stop %}total-stop{% endif %}">
+        {% if total_stop %}
+            Total Stop is ACTIVE!
+        {% else %}
+            Total Stop is INACTIVE.
+        {% endif %}
+    </div>
 </body>
 </html>
