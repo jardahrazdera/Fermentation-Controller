@@ -3,6 +3,43 @@ from core.models import Sensor, Valve, Tank, Log, DigitalInput, Relay
 from django.utils import timezone
 
 
+def check_and_trigger_alarm():
+    """
+    Checks alarm conditions and activates the alarm relay if necessary.
+    """
+    client = EvokClient()
+
+    # Alarm conditions
+    alarm_triggered = False
+    alarm_message = ""
+
+    # Check sensors for errors or out-of-range temperatures
+    sensors = Sensor.objects.all()
+    for sensor in sensors:
+        if sensor.is_faulty:
+            alarm_triggered = True
+            alarm_message += f"Sensor '{sensor.name}' is faulty. "
+        elif sensor.current_temperature is not None:
+            if sensor.current_temperature < sensor.min_temp or sensor.current_temperature > sensor.max_temp:
+                alarm_triggered = True
+                alarm_message += (f"Sensor '{sensor.name}' temperature {sensor.current_temperature}°C "
+                                  f"is out of range ({sensor.min_temp}°C - {sensor.max_temp}°C). ")
+
+    # Activate or deactivate the alarm relay
+    alarm_relay = Relay.objects.get(name="Alarm_Relay")
+    if alarm_triggered:
+        client.set_relay(alarm_relay.circuit, 1)  # Turn on alarm relay
+        alarm_relay.is_active = True
+        Log.objects.create(message="Alarm triggered: " + alarm_message)
+    else:
+        client.set_relay(alarm_relay.circuit, 0)  # Turn off alarm relay
+        alarm_relay.is_active = False
+        Log.objects.create(message="Alarm manually deactivated.", tank=None)
+        Log.objects.create(message="Alarm cleared.")
+
+    alarm_relay.save()
+
+
 def regulate_temperature():
     """
     Automatically regulates the temperature of each tank by controlling valves.

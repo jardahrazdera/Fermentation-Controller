@@ -23,6 +23,20 @@
 <body>
     <h1>System Status</h1>
 
+    <h2>Alarm Status</h2>
+<div class="{% if alarm_active %}active{% else %}inactive{% endif %}">
+    {% if alarm_active %}
+        <p>Alarm is ACTIVE!</p>
+        <p>Please check sensors and confirm to deactivate.</p>
+        <form method="POST" action="{% url 'deactivate_alarm' %}">
+            {% csrf_token %}
+            <button type="submit">Deactivate Alarm</button>
+        </form>
+    {% else %}
+        <p>Alarm is INACTIVE.</p>
+    {% endif %}
+</div>
+
     <h2>Digital Inputs</h2>
     <table border="1">
         <thead>

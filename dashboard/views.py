@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from core.models import Tank, Log, DigitalInput, Relay
-
+from api.evok_client import EvokClient
 
 def tank_dashboard(request):
     """
@@ -43,18 +43,40 @@ def set_target_temperature(request, tank_name):
 def system_status(request):
     """
     Displays the current status of the system (digital inputs and relays).
+    Displays the current status of the system, including alarm state.
     """
     inputs = DigitalInput.objects.all()
     relays = Relay.objects.all()
 
     # Get the state of Total Stop
     total_stop = DigitalInput.objects.get(name="Total_Stop_DI").state
+    # Get the alarm state
+    alarm_relay = Relay.objects.get(name="Alarm_Relay")
+    alarm_active = alarm_relay.is_active
 
     context = {
         'inputs': inputs,
         'relays': relays,
         'total_stop': total_stop,
+        'alarm_active': alarm_active,
     }
     return render(request, 'dashboard/system_status.html', context)
+
+
+def deactivate_alarm(request):
+    """
+    Deactivates the alarm manually.
+    """
+    if request.method == "POST":
+        alarm_relay = Relay.objects.get(name="Alarm_Relay")
+        alarm_relay.is_active = False
+        alarm_relay.save()
+
+        client = EvokClient()
+        client.set_relay(alarm_relay.circuit, 0)  # Turn off alarm relay
+
+        Log.objects.create(message="Alarm manually deactivated.")
+    return redirect('system_status')
+
 
 
