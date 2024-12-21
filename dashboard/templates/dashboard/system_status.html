@@ -1,41 +1,27 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>System Status</title>
-    <style>
-        .active {
-            color: green;
-            font-weight: bold;
-        }
-        .inactive {
-            color: red;
-            font-weight: bold;
-        }
-        .total-stop {
-            background-color: yellow;
-            color: black;
-            padding: 5px;
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <h1>System Status</h1>
+    <div id="current-time"></div>
+    <script src="{% static 'js/app.js' %}"></script>
 
     <h2>Alarm Status</h2>
-<div class="{% if alarm_active %}active{% else %}inactive{% endif %}">
-    {% if alarm_active %}
-        <p>Alarm is ACTIVE!</p>
-        <p>Please check sensors and confirm to deactivate.</p>
-        <form method="POST" action="{% url 'deactivate_alarm' %}">
-            {% csrf_token %}
-            <button type="submit">Deactivate Alarm</button>
-        </form>
-    {% else %}
-        <p>Alarm is INACTIVE.</p>
-    {% endif %}
-</div>
+    <div class="{% if alarm_active %}active{% else %}inactive{% endif %}">
+        <h3>{% if alarm_active %}⚠️ Alarm is ACTIVE! ⚠️{% else %}✅ Alarm is INACTIVE{% endif %}</h3>
+        {% if alarm_active %}
+            <p>Please check sensors and confirm to deactivate.</p>
+            <form method="POST" action="{% url 'deactivate_alarm' %}">
+                {% csrf_token %}
+                <button type="submit">Deactivate Alarm</button>
+            </form>
+        {% endif %}
+    </div>
 
     <h2>Digital Inputs</h2>
     <table border="1">
@@ -51,9 +37,9 @@
                 <td>{{ input.name }}</td>
                 <td class="{% if input.state %}active{% else %}inactive{% endif %}">
                     {% if input.state %}
-                        Active
+                        <span>✅ Active</span>
                     {% else %}
-                        Inactive
+                        <span>❌ Inactive</span>
                     {% endif %}
                 </td>
             </tr>
@@ -75,9 +61,9 @@
                 <td>{{ relay.name }}</td>
                 <td class="{% if relay.is_active %}active{% else %}inactive{% endif %}">
                     {% if relay.is_active %}
-                        Active
+                        <span>✅ Active</span>
                     {% else %}
-                        Inactive
+                        <span>❌ Inactive</span>
                     {% endif %}
                 </td>
             </tr>
@@ -87,11 +73,7 @@
 
     <h2>Total Stop</h2>
     <div class="{% if total_stop %}total-stop{% endif %}">
-        {% if total_stop %}
-            Total Stop is ACTIVE!
-        {% else %}
-            Total Stop is INACTIVE.
-        {% endif %}
+        <h3>{% if total_stop %}⚠️ Total Stop is ACTIVE! ⚠️{% else %}✅ Total Stop is INACTIVE{% endif %}</h3>
     </div>
 </body>
 </html>

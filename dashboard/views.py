@@ -47,13 +47,11 @@ def system_status(request):
     """
     inputs = DigitalInput.objects.all()
     relays = Relay.objects.all()
-
     # Get the state of Total Stop
     total_stop = DigitalInput.objects.get(name="Total_Stop_DI").state
     # Get the alarm state
     alarm_relay = Relay.objects.get(name="Alarm_Relay")
     alarm_active = alarm_relay.is_active
-
     context = {
         'inputs': inputs,
         'relays': relays,

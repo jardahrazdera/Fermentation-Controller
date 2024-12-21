@@ -1,0 +1,14 @@
+.active {
+    color: red;
+    font-weight: bold;
+}
+.inactive {
+    color: forestgreen;
+    font-weight: bold;
+}
+.total-stop {
+    background-color: yellow;
+    color: black;
+    padding: 5px;
+    font-weight: bold;
+}
