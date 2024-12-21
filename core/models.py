@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 
 class Tank(models.Model):
@@ -14,8 +15,6 @@ class Tank(models.Model):
         return self.name
 
 
-from django.db import models
-
 class Sensor(models.Model):
     name = models.CharField(max_length=50, unique=True)
     circuit = models.CharField(max_length=50, help_text="1-Wire address or EVOK API circuit ID")
@@ -23,16 +22,41 @@ class Sensor(models.Model):
     last_updated = models.DateTimeField(auto_now=True)
     min_temp = models.FloatField(default=0.0, help_text="Minimum acceptable temperature")
     max_temp = models.FloatField(default=25.0, help_text="Maximum acceptable temperature")
+    last_error_time = models.DateTimeField(null=True, blank=True, help_text="Time of the last detected error.")
+    error_active = models.BooleanField(default=False, help_text="Indicates if the sensor is currently in error state.")
 
     @property
     def is_faulty(self):
         """
-        Determines if the sensor is faulty.
+        Determines if the sensor is faulty using the 'lost' parameter from the API.
         """
-        return self.current_temperature is None
+        return self.error_active
+
+    @property
+    def error_persistent(self):
+        """
+        Checks if the error state has persisted for more than 60 seconds.
+        """
+        if self.last_error_time and self.error_active:
+            elapsed_time = (now() - self.last_error_time).total_seconds()
+            return elapsed_time > 60
+        return False
+
+    def update_error_state(self, lost):
+        """
+        Updates the error state of the sensor based on the 'lost' parameter.
+        """
+        if lost:
+            if not self.error_active:
+                self.last_error_time = now()
+            self.error_active = True
+        else:
+            self.error_active = False
+            self.last_error_time = None
+        self.save()
 
     def __str__(self):
-        return f"{self.name} - {self.current_temperature} °C"
+        return f"{self.name} - {self.current_temperature} °C - {'Error' if self.error_active else 'OK'}"
 
 
 class Valve(models.Model):

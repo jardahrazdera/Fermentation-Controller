@@ -8,6 +8,22 @@ class EvokClient:
     def __init__(self, base_url=EVOK_BASE_URL):
         self.base_url = base_url
 
+    def get_sensor_status(self, circuit):
+        """
+        Checks the status of the sensor, including the 'lost' attribute from EVOK API.
+        :param circuit: The circuit ID of the sensor.
+        :return: True if the sensor is 'lost', False otherwise.
+        """
+        url = f"{self.base_url}/temp/{circuit}"
+        try:
+            response = requests.get(url, headers={"Accept": "application/json"})
+            response.raise_for_status()
+            data = response.json()
+            return data.get("lost", False)
+        except requests.RequestException as e:
+            print(f"Error fetching status for sensor {circuit}: {e}")
+            return True  # Treat as 'lost' in case of an error
+
     def get_temperature(self, circuit):
         url = f"{self.base_url}/temp/{circuit}"
         try:

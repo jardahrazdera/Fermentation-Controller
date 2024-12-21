@@ -1,25 +1,51 @@
+import time
+from datetime import timedelta
 from api.evok_client import EvokClient
 from core.models import Sensor, Valve, Tank, Log, DigitalInput, Relay
 from django.utils import timezone
+
+sensor_error_times = {}
 
 
 def check_and_trigger_alarm():
     """
     Checks alarm conditions and activates the alarm relay if necessary.
+    Handles sensor faults and triggers alarm after 60 seconds of persistent faults.
     """
     client = EvokClient()
-
-    # Alarm conditions
     alarm_triggered = False
     alarm_message = ""
 
-    # Check sensors for errors or out-of-range temperatures
+    # Check all sensors for errors or out-of-range temperatures
     sensors = Sensor.objects.all()
+    now = timezone.now()
     for sensor in sensors:
-        if sensor.is_faulty:
-            alarm_triggered = True
-            alarm_message += f"Sensor '{sensor.name}' is faulty. "
-        elif sensor.current_temperature is not None:
+        lost = client.get_sensor_status(sensor.circuit)  # Assume 'get_sensor_status' returns 'lost' state
+
+        # Update error state based on API response
+        sensor.update_error_state(lost)
+
+        if sensor.error_active:
+            # Track persistent errors
+            if sensor.circuit not in sensor_error_times:
+                sensor_error_times[sensor.circuit] = now
+            else:
+                elapsed = now - sensor_error_times[sensor.circuit]
+                if elapsed > timedelta(seconds=60):
+                    alarm_triggered = True
+                    alarm_message += f"Sensor '{sensor.name}' is faulty for over 60 seconds. "
+                    Log.objects.create(
+                        tank=None,
+                        event=f"Alarm triggered for sensor '{sensor.name}'.",
+                        message=f"Sensor '{sensor.name}' has been in error state for over 60 seconds.",
+                    )
+        else:
+            # Clear error tracking if the sensor is no longer faulty
+            if sensor.circuit in sensor_error_times:
+                del sensor_error_times[sensor.circuit]
+
+        # Check temperature limits
+        if sensor.current_temperature is not None:
             if sensor.current_temperature < sensor.min_temp or sensor.current_temperature > sensor.max_temp:
                 alarm_triggered = True
                 alarm_message += (f"Sensor '{sensor.name}' temperature {sensor.current_temperature}°C "
@@ -34,7 +60,6 @@ def check_and_trigger_alarm():
     else:
         client.set_relay(alarm_relay.circuit, 0)  # Turn off alarm relay
         alarm_relay.is_active = False
-        Log.objects.create(message="Alarm manually deactivated.", tank=None)
         Log.objects.create(message="Alarm cleared.")
 
     alarm_relay.save()
@@ -43,7 +68,7 @@ def check_and_trigger_alarm():
 def regulate_temperature():
     """
     Automatically regulates the temperature of each tank by controlling valves.
-    Logs all events such as temperature updates and valve state changes.
+    Also triggers alarms for persistent sensor faults or temperature violations.
     """
     client = EvokClient()
     tanks = Tank.objects.select_related('sensor', 'valve').all()
@@ -52,47 +77,53 @@ def regulate_temperature():
         if tank.sensor and tank.valve:
             # Read the current temperature
             current_temp = client.get_temperature(tank.sensor.circuit)
-            if current_temp is None:
-                Log.objects.create(
-                    tank=tank,
-                    event=f"Failed to read temperature for sensor '{tank.sensor.name}'.",
-                    temperature=None,
-                )
-                print(f"Failed to read temperature for sensor '{tank.sensor.name}'.")
+            now = timezone.now()
+
+            # Update sensor state and trigger alarms if needed
+            lost = client.get_sensor_status(tank.sensor.circuit)  # Assume 'get_sensor_status' returns 'lost'
+            tank.sensor.update_error_state(lost)
+
+            if tank.sensor.error_persistent:
+                # Alarm already triggered in `check_and_trigger_alarm`
                 continue
 
             # Log temperature reading
-            Log.objects.create(
-                tank=tank,
-                event="Temperature updated.",
-                temperature=current_temp,
-            )
-            print(f"Tank '{tank.name}': Current Temp = {current_temp} °C, Target Temp = {tank.target_temperature} °C")
+            if current_temp is not None:
+                tank.sensor.current_temperature = current_temp
+                tank.sensor.last_updated = now
+                tank.sensor.save()
+
+                Log.objects.create(
+                    tank=tank,
+                    event="Temperature updated.",
+                    temperature=current_temp,
+                )
+                print(f"Tank '{tank.name}': Current Temp = {current_temp} °C, Target Temp = {tank.target_temperature} °C")
 
             # Check if valve needs to be opened or closed
             if current_temp > tank.target_temperature and not tank.valve.is_open:
                 client.set_relay(tank.valve.circuit, 1)  # Open valve
                 tank.valve.is_open = True
-                tank.valve.last_updated = timezone.now()
+                tank.valve.last_updated = now
                 tank.valve.save()
                 Log.objects.create(
                     tank=tank,
                     event=f"Valve '{tank.valve.name}' opened.",
                     valve_state=True,
                 )
-                print(f"Valve '{tank.valve.name}' opened to cool tank '{tank.name}'.")
-
             elif current_temp <= tank.target_temperature and tank.valve.is_open:
                 client.set_relay(tank.valve.circuit, 0)  # Close valve
                 tank.valve.is_open = False
-                tank.valve.last_updated = timezone.now()
+                tank.valve.last_updated = now
                 tank.valve.save()
                 Log.objects.create(
                     tank=tank,
                     event=f"Valve '{tank.valve.name}' closed.",
                     valve_state=False,
                 )
-                print(f"Valve '{tank.valve.name}' closed as tank '{tank.name}' is at target temperature.")
+
+    # Check and trigger alarms for persistent errors
+    check_and_trigger_alarm()
 
 
 def update_sensors():
