@@ -1,34 +1,34 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fermentation Dashboard</title>
+    <title>Tank Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-    <h1>Fermentation Tank Dashboard</h1>
-    <table border="1">
+    <h1>Tank Dashboard</h1>
+    <table>
         <thead>
             <tr>
                 <th>Tank</th>
                 <th>Current Temperature (°C)</th>
                 <th>Target Temperature (°C)</th>
-                <th>Valve State</th>
             </tr>
         </thead>
         <tbody>
             {% for tank in tanks %}
             <tr>
                 <td>{{ tank.name }}</td>
-                <td>{{ tank.sensor.current_temperature }}</td>
-                <td>{{ tank.target_temperature }}</td>
                 <td>
-                    {% if tank.valve.is_open %}
-                        Open
+                    {% if tank.sensor %}
+                        {{ tank.sensor.current_temperature|default:"N/A" }}
                     {% else %}
-                        Closed
+                        No Sensor
                     {% endif %}
                 </td>
+                <td>{{ tank.target_temperature }}</td>
             </tr>
             {% endfor %}
         </tbody>

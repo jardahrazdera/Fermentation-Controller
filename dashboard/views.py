@@ -4,9 +4,9 @@ from api.evok_client import EvokClient
 
 def tank_dashboard(request):
     """
-    Displays the dashboard with tanks, their temperatures, and valve states.
+    Displays the tank dashboard with current temperature data.
     """
-    tanks = Tank.objects.select_related('sensor', 'valve').all()
+    tanks = Tank.objects.select_related('sensor').all()
     context = {
         'tanks': tanks,
     }

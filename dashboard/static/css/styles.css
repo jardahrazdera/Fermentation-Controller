@@ -1,18 +1,51 @@
+/* Global Styles */
 body {
     font-family: Arial, sans-serif;
 }
 
+/* Status Indicators */
 .active {
-    color: red;
+    color: forestgreen; /* Changed to green to indicate active state */
     font-weight: bold;
 }
+
 .inactive {
-    color: forestgreen;
+    color: gray; /* Changed to gray to indicate inactive state */
     font-weight: bold;
 }
+
 .total-stop {
     background-color: yellow;
     color: black;
     padding: 5px;
     font-weight: bold;
+    text-align: center; /* Added for better text alignment */
+    border: 2px solid black; /* Highlighted border */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px; /* Added margin to separate the table from other content */
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* Slightly distinguished even rows */
+}
+
+tr:hover {
+    background-color: #f1f1f1; /* Highlighted when hovered over */
 }

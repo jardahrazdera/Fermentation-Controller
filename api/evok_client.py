@@ -10,22 +10,27 @@ class EvokClient:
 
     def get_sensor_status(self, circuit):
         """
-        Checks the status of the sensor, including the 'lost' attribute from EVOK API.
+        Checks the validity of the sensor's data using the 'valid' parameter from EVOK API.
         :param circuit: The circuit ID of the sensor.
-        :return: True if the sensor is 'lost', False otherwise.
+        :return: False if the data is invalid, True otherwise.
         """
-        url = f"{self.base_url}/temp/{circuit}"
+        url = f"{self.base_url}/data_point/{circuit}"
         try:
             response = requests.get(url, headers={"Accept": "application/json"})
             response.raise_for_status()
             data = response.json()
-            return data.get("lost", False)
+            return data.get("valid", False)  # Default to False if 'valid' is not present
         except requests.RequestException as e:
             print(f"Error fetching status for sensor {circuit}: {e}")
-            return True  # Treat as 'lost' in case of an error
+            return False  # Treat as invalid in case of an error
 
     def get_temperature(self, circuit):
-        url = f"{self.base_url}/temp/{circuit}"
+        """
+        Reads temperature data from an xG18 sensor via EVOK API.
+        :param circuit: The circuit ID of the sensor (e.g., 'xG18_1').
+        :return: The temperature value or None on error.
+        """
+        url = f"{self.base_url}/data_point/{circuit}"
         try:
             response = requests.get(url, headers={"Accept": "application/json"})
             response.raise_for_status()
@@ -87,8 +92,8 @@ class EvokClient:
 if __name__ == "__main__":
     client = EvokClient()
 
-    # Test temperature reading
-    sensor_circuit = "2870F55704E13DC0"
+    # Test temperature reading from xG18 module
+    sensor_circuit = "xG18_1"
     temp = client.get_temperature(sensor_circuit)
     print(f"Temperature for circuit {sensor_circuit}: {temp} °C")
 
