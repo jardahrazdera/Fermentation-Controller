@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,6 +14,7 @@
                 <th>Tank</th>
                 <th>Current Temperature (°C)</th>
                 <th>Target Temperature (°C)</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -29,6 +29,9 @@
                     {% endif %}
                 </td>
                 <td>{{ tank.target_temperature }}</td>
+                <td>
+                    <a href="{% url 'temperature_graph' tank.name %}">View Graph</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

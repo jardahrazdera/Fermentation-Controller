@@ -1,0 +1,16 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Temperature Graph</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <h1>Temperature Graph for {{ tank.name }}</h1>
+    <div>
+        {{ graph_div|safe }}
+    </div>
+    <a href="{% url 'tank_dashboard' %}">Back to Dashboard</a>
+</body>
+</html>

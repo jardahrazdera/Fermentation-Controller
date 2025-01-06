@@ -1,6 +1,42 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from core.models import Tank, Log, DigitalInput, Relay
 from api.evok_client import EvokClient
+import plotly.graph_objects as go
+
+
+def temperature_graph(request, tank_name):
+    """
+    Generates a temperature history graph for the given tank.
+    """
+    tank = Tank.objects.get(name=tank_name)
+    logs = Log.objects.filter(tank=tank).order_by('timestamp')
+
+    timestamps = [log.timestamp for log in logs]
+    temperatures = [log.temperature for log in logs if log.temperature is not None]
+
+    # Create Plotly graph
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(
+        x=timestamps,
+        y=temperatures,
+        mode='lines+markers',
+        name='Temperature'
+    ))
+    fig.update_layout(
+        title=f"Temperature History for {tank.name}",
+        xaxis_title="Time",
+        yaxis_title="Temperature (°C)",
+        template="plotly_white"
+    )
+
+    # Render the graph as a div
+    graph_div = fig.to_html(full_html=False)
+
+    return render(request, 'dashboard/temperature_graph.html', {
+        'tank': tank,
+        'graph_div': graph_div
+    })
+
 
 def tank_dashboard(request):
     """
