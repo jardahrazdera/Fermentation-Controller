@@ -5,18 +5,7 @@
 {% block title %}System Status{% endblock %}
 
 {% block content %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>System Status</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
-</head>
-<body>
     <h1>System Status</h1>
-    <div id="current-time"></div>
-    <script src="{% static 'js/app.js' %}"></script>
 
     <h2>Alarm Status</h2>
     <div class="{% if alarm_active %}active{% else %}inactive{% endif %}">
@@ -82,6 +71,4 @@
     <div class="{% if total_stop %}total-stop{% endif %}">
         <h3>{% if total_stop %}⚠️ Total Stop is ACTIVE! ⚠️{% else %}✅ Total Stop is INACTIVE{% endif %}</h3>
     </div>
-</body>
-</html>
 {% endblock %}

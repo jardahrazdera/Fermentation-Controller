@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>{% block title %}Dashboard{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="{% static 'js/app.js' %}"></script>
 </head>
 <body>
     <!-- Navigation Menu -->
@@ -13,6 +14,7 @@
             <li><a href="{% url 'tank_dashboard' %}">Home</a></li>
             <li><a href="{% url 'log_view' %}">Logs</a></li>
             <li><a href="{% url 'system_status' %}">System Status</a></li>
+            <li class="datetime" id="current-time"></li>
         </ul>
     </nav>
 
