@@ -1,12 +1,8 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Tank Dashboard</title>
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-</head>
-<body>
+{% extends "dashboard/base.html" %}
+
+{% block title %}Tank Dashboard{% endblock %}
+
+{% block content %}
     <h1>Tank Dashboard</h1>
     <table>
         <thead>
@@ -30,11 +26,15 @@
                 </td>
                 <td>{{ tank.target_temperature }}</td>
                 <td>
+                    <form method="POST" action="{% url 'set_target_temperature' tank.name %}">
+                        {% csrf_token %}
+                        <input type="number" name="target_temperature" step="0.1" placeholder="Set Temp (°C)" required>
+                        <button type="submit">Set</button>
+                    </form>
                     <a href="{% url 'temperature_graph' tank.name %}">View Graph</a>
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-</body>
-</html>
+{% endblock %}
