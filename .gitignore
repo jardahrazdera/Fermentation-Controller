@@ -1,18 +1,84 @@
-# Virtual Environment
-.venv/
-
-# Python cache
+# --- Python ---
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.so
 
-# SQLite database
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+
+# --- Django ---
+# Database files
 db.sqlite3
+*.sqlite3
+db.sqlite3-journal
 
-# Static files
+# Collected static files for deployment
 /staticfiles/
+/static_root/
 
-# Specific OS (MacOS) files
-*.DS_Store
+# User-uploaded media files
+/media/
 
+# Log files
+*.log
+logs/
+
+
+# --- Environment & Secrets ---
+# Never commit secrets or environment-specific files.
+# Use a .env.example file as a template.
+.env
+.env.*
+!.env.example
+
+
+# --- Testing ---
+# Test runner output
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.tox/
+
+
+# --- IDEs & Editors ---
 # PyCharm
 .idea/
+
+# VSCode
+.vscode/
+
+# Vim
+*.swp
+*.swo
+*~
+
+
+# --- Operating System Files ---
+# macOS
+.DS_Store
+.AppleDouble
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+
+# --- Frontend ---
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-error.log
