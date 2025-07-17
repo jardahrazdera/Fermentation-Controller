@@ -9,6 +9,8 @@ A modern, scalable, and automated fermentation process control system built to m
 
 The **Fermentation Controller** is an advanced software-hardware solution that regulates temperatures and manages the operation of fermentation tanks during brewing. It integrates temperature sensors, relays, and valves to automate critical processes like cooling, pumping, and safety measures. The project emphasizes **scalability**, **modularity**, and an attractive graphical interface for real-time control.
 
+"This project is currently on hold/work in progress, but represents a significant learning endeavor in automated fermentation control."
+
 ---
 
 ## ⚙️ **Features**
